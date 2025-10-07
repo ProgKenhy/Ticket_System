@@ -1,0 +1,99 @@
+x-app: &default-app
+  build:
+    context: "."
+    target: "app"
+    args:
+      - "UID=${UID:-1000}"
+      - "GID=${GID:-1000}"
+      - "DEBUG=${DEBUG:-false}"
+  depends_on:
+    redis:
+      condition: "service_healthy"
+  env_file:
+    - ".env"
+  restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+  stop_grace_period: "3s"
+  tty: true
+  networks:
+    - ticket_net
+  environment:
+    - REDIS_HOST={$REDIS_HOST}
+    - REDIS_PORT=${REDIS_PORT}
+    - REDIS_PASS=${REDIS_PASS}
+    - REDIS_DB=${REDIS_DB}
+
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: ticket_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASS}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASS}
+      MYSQL_DATABASE: ${MYSQL_NAME}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "${MYSQL_USER}", "--password=${MYSQL_PASS}"]
+      interval: 10s
+      retries: 5
+    networks:
+      - ticket_net
+
+  redis:
+    image: redis:8.2.1-alpine
+    container_name: ticket_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    environment:
+      - REDIS_PASS=${REDIS_PASS}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASS}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - ticket_net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: ticket_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"       # брокер
+      - "15672:15672"     # веб-UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ticket_net
+
+#  app:
+#    <<: *default-app
+#    container_name: ticket_app
+#    ports:
+#      - "${API_PORT:-8000}:8000"
+#    volumes:
+#      - ./src:/app/src:ro
+#    healthcheck:
+#      test: [ 'CMD', 'curl', 'localhost:8000' ]
+#      interval: 10s
+#      timeout: 5s
+#      start_period: 5s
+#      retries: 3
+#    networks:
+#      - ticket_net
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+  redis_data:
+
+networks:
+  ticket_net:
+    driver: bridge
