@@ -2,10 +2,12 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from auth.routers import auth_router
 from users.routers import users_router
+from tickets.routers import ticket_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(users_router, prefix="/users", tags=["users"])
+api_router.include_router(ticket_router, prefix="/ticket", tags=["ticket"])
 
 
 @api_router.get("/health/")
