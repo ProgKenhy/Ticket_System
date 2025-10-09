@@ -1,15 +1,27 @@
-from typing import Optional
-
-from sqlalchemy import select, or_
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from users.models import User
+from .schemas import UserCreate, UserRegister
+from auth.utils import get_password_hash
+from .crud import create_user, get_user_by_email, get_user_by_username
 
 
-async def get_user_by_login(login: str,
-                   db_session: AsyncSession) -> Optional[User]:
-    """Получение пользователя по username(email) из БД"""
-    stmt = select(User).where(or_(User.username == login, User.email == login))
-    result = await db_session.execute(stmt)
-    user = result.scalar_one_or_none()
-    return user
+async def register_user(body: UserRegister, db: AsyncSession) -> User:
+    if await get_user_by_email(body.email, db):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+    if await get_user_by_username(body.username, db):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already registered")
+
+    data = body.model_dump()
+    data["hashed_password"] = get_password_hash(data.pop("password"))
+    user_create = UserCreate(**data)
+    try:
+        user = await create_user(user_create, db)
+        await db.commit()
+        await db.refresh(user)
+        return user
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")
