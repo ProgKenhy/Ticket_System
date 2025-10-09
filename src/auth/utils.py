@@ -26,14 +26,14 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(
         subject: str,
-        expires_delta: timedelta = ACCESS_TOKEN_EXPIRE_MINUTES,
+        expires_delta: float = ACCESS_TOKEN_EXPIRE_MINUTES,
         additional_data: Optional[dict[str, Any]] = None,
 ) -> str:
     """Создание access token"""
     if not subject:
         raise ValueError("Subject cannot be empty")
 
-    expire = datetime.now(UTC) + expires_delta
+    expire = datetime.now(UTC) + timedelta(minutes=expires_delta)
     token_data = TokenData(sub=subject, exp=expire, type="access")
 
     payload = token_data.model_dump()

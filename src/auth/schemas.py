@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class Token(BaseModel):
     """Модель Token"""
     access_token: str
