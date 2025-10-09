@@ -33,7 +33,7 @@ async def get_user_by_username(username: str,
 
 
 async def create_user(user_create: UserCreate, db: AsyncSession) -> User:
-    """Добавляет объект в сессию, но не делает commit.
+    """Добавляет объект user в сессию, но не делает commit.
        Возвращает ORM-объект; refresh нужно сделать вне или внутри транзакции."""
     user = User(**user_create.model_dump())
     db.add(user)

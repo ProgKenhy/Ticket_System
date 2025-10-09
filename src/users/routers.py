@@ -14,11 +14,11 @@ users_router = APIRouter()
 
 
 @users_router.post("/register", response_model=UserResponse)
-async def registration_user(body: UserRegister, db: Annotated[AsyncSession, Depends(get_db_session)]):
+async def register_user_endpoint(body: UserRegister, db: Annotated[AsyncSession, Depends(get_db_session)]):
     new_user = await register_user(body, db)
     return UserResponse.model_validate(new_user)
 
 
 @users_router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: Annotated[User, Depends(get_user_by_token)]):
+async def read_users_me_endpoint(current_user: Annotated[User, Depends(get_user_by_token)]):
     return UserResponse.model_validate(current_user, from_attributes=True)
