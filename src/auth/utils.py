@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, UTC
 from typing import Any, Optional
 
-from core.settings import settings
+from core.settings import auth_settings
 from pwdlib import PasswordHash
 from fastapi import HTTPException, status
 from .schemas import TokenData
@@ -9,9 +9,9 @@ from .schemas import TokenData
 import jwt
 
 pwd_context = PasswordHash.recommended()
-ACCESS_TOKEN_EXPIRE_MINUTES: int = settings.auth.ACCESS_TOKEN_EXPIRE_MINUTES
-SECRET_KEY: str = settings.auth.SECRET_KEY.get_secret_value()
-JWT_ALG: str = settings.auth.JWT_ALG
+ACCESS_TOKEN_EXPIRE_MINUTES: int = auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES
+SECRET_KEY: str = auth_settings.SECRET_KEY.get_secret_value()
+JWT_ALG: str = auth_settings.JWT_ALG
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

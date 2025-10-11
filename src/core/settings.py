@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from pydantic import Field, SecretStr, RedisDsn
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -38,28 +37,29 @@ class MySQLSettings(MyBaseSettings):
 
 class RedisSettings(MyBaseSettings):
     """Конфиг Redis"""
-    REDIS_URL: RedisDsn = Field(
-        default="redis://redis:6379/0",
-        description="Redis connection URL",
-    )
+    HOST: str = Field(alias="REDIS_HOST", default="localhost")
+    PORT: int = Field(alias="REDIS_PORT", default=6379)
+    DB: int = Field(alias="REDIS_DB", default=0)
+    PASSWORD: str = Field(alias="REDIS_PASSWORD", default="")
 
     @property
-    def sync_url(self) -> str:
-        """Получение ссылки для синхронной работы с Redis"""
-        return str(self.REDIS_URL)
+    def async_url(self) -> str:
+        return f"redis://{self.HOST}:{self.PORT}/{self.DB}"
 
 class AuthSettings(MyBaseSettings):
+    """Конфиг авторизации"""
     SECRET_KEY: SecretStr = Field(alias="SECRET_KEY", default=None)
     JWT_ALG: str = Field(alias="JWT_ALG", default="HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(alias="ACCESS_TOKEN_EXPIRE_MINUTES", default=30)
 
-class Settings(MyBaseSettings):
-    """Конфиг всего приложения (общий конфиг)"""
-    database: MySQLSettings = MySQLSettings()
-    auth: AuthSettings = AuthSettings()
 
+class Settings(MyBaseSettings):
+    """Конфиг приложения (общий конфиг)"""
     DEBUG: bool = Field(alias="DEBUG", default=False)
     ENVIRONMENT: str = Field(alias="ENVIRONMENT", default="development")
 
 
 settings = Settings()
+redis_settings = RedisSettings()
+auth_settings = AuthSettings()
+mysql_settings = MySQLSettings()
