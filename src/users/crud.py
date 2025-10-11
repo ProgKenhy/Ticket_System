@@ -6,6 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from users.models import User
 from users.schemas import UserCreate
+async def get_user_by_id(user_id: int, db: AsyncSession) -> Optional[User]:
+    """Получение пользователя по id из БД"""
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    return user
 
 async def get_user_by_login(login: str,
                    db: AsyncSession) -> Optional[User]:
