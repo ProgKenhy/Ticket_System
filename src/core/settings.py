@@ -42,6 +42,8 @@ class RedisSettings(MyBaseSettings):
     DB: int = Field(alias="REDIS_DB", default=0)
     PASSWORD: str = Field(alias="REDIS_PASSWORD", default="")
 
+    TTL: int = Field(alias="REDIS_TTL", default=-1)
+
     @property
     def async_url(self) -> str:
         return f"redis://{self.HOST}:{self.PORT}/{self.DB}"

@@ -1,6 +1,7 @@
 import logging
 import sys
 from pathlib import Path
+from core.middleware import RedisSessionMiddleware
 
 sys.path.append(str(Path(__file__).resolve().parent))
 
@@ -12,6 +13,7 @@ log = logging.getLogger(__name__)
 app = FastAPI(root_path="/api")
 
 app.include_router(api_router)
+app.add_middleware(RedisSessionMiddleware)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

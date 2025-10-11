@@ -41,3 +41,14 @@ class Ticket(MyBaseModel):
         argument="User",
         back_populates="tickets",
         lazy="joined")
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "status": self.status.value if hasattr(self.status, "value") else self.status,
+            "user_id": self.user_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
