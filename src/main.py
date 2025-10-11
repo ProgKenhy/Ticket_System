@@ -1,3 +1,4 @@
+import logging
 import sys
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI
 from core.routers import api_router
 
+log = logging.getLogger(__name__)
 app = FastAPI(root_path="/api")
 
 app.include_router(api_router)
