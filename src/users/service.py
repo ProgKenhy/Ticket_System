@@ -1,7 +1,8 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from auth.schemas import SessionData
 from users.models import User
 from .schemas import UserCreate, UserRegister
 from auth.utils import get_password_hash
@@ -25,3 +26,16 @@ async def register_user(body: UserRegister, db: AsyncSession) -> User:
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")
+
+
+async def get_user_session(request: Request) -> SessionData:
+    """Получение пользователя из сессии"""
+    session = request.state.session
+
+    if not session.get("is_authenticated"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    return SessionData.model_validate(session)
