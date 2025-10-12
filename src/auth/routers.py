@@ -25,7 +25,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     return Token(access_token=token_str, token_type="bearer")
 
 
-@auth_router.post("/logout")
+@auth_router.post("/delete_session")
 async def logout(response: Response, request: Request):
     """Выход пользователя - очистка сессии"""
     await delete_session(response=response, request=request)
