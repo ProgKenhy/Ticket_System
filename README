@@ -1,0 +1,14 @@
+# Создать новую миграцию
+alembic revision --autogenerate -m "description"
+
+# Применить миграции
+alembic upgrade head
+
+# Откатить последнюю миграцию
+alembic downgrade -1
+
+# Показать историю миграций
+alembic history
+
+# Показать текущую версию
+alembic current
