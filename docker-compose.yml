@@ -21,7 +21,7 @@ x-app: &default-app
   networks:
     - ticket_net
   environment:
-    - REDIS_HOST={$REDIS_HOST}
+    - REDIS_HOST=${REDIS_HOST}
     - REDIS_PORT=${REDIS_PORT}
     - REDIS_PASS=${REDIS_PASS}
     - REDIS_DB=${REDIS_DB}
@@ -95,8 +95,9 @@ services:
       - "${API_PORT:-8000}:8000"
     volumes:
       - ./src:/app/src:ro
+      - ./logs:/app/logs
     healthcheck:
-      test: [ 'CMD', 'curl', 'localhost:8000' ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 10s
       timeout: 5s
       start_period: 5s
