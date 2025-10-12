@@ -21,6 +21,12 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
         session_id = request.cookies.get(SESSION_COOKIE)
         is_new = False
 
+        user_agent = request.headers.get("user-agent", "")
+        if (request.url.path in ["/health", "/"] or
+            "curl" in user_agent.lower() or
+            "healthcheck" in user_agent.lower()):
+            return await call_next(request)
+
         if not session_id:
             session_id = str(uuid.uuid4())
             session = {"created_at": _now_iso(), "last_activity": _now_iso()}
