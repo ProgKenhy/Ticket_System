@@ -11,6 +11,7 @@ import hashlib
 
 redis_client = aioredis.from_url(redis_settings.async_url, decode_responses=True, password=redis_settings.PASSWORD)
 
+
 async def _normalize_for_json(obj):
     """Преобразует объект в JSON-сериализуемую структуру."""
     if isinstance(obj, BaseModel):
@@ -32,6 +33,7 @@ async def _normalize_for_json(obj):
         return result
     return obj
 
+
 async def _serialize_result(result):
     """Возвращает JSON-сериализуемую структуру: если list -> список сериализованных элементов."""
     if isinstance(result, list):
@@ -43,9 +45,11 @@ async def _serialize_result(result):
 
 
 def make_cache_key(prefix: str, *parts) -> str:
+    """Создание ключа для словаря(кэш редис)"""
     key_base = "|".join(map(str, parts))
     hashed = hashlib.sha256(key_base.encode()).hexdigest()
     return f"{prefix}:{hashed}"
+
 
 async def get_cached_or_set(key: str, loader: Callable, ttl: int = redis_settings.TTL):
     """Получение данных из хэша либо добавление их при отсутствии"""
