@@ -18,7 +18,7 @@ class MyBaseSettings(BaseSettings):
 
 class MySQLSettings(MyBaseSettings):
     """Конфиг MySQL"""
-    HOST: str = Field(alias="MYSQL_HOST", default="localhost")
+    HOST: str = Field(alias="MYSQL_HOST", default="mysql")
     PORT: int = Field(alias="MYSQL_PORT", default=3306)
     USER: str = Field(alias="MYSQL_USER", default="bd_user")
     PASS: SecretStr = Field(alias="MYSQL_PASS", default="bd_pass")
@@ -37,7 +37,7 @@ class MySQLSettings(MyBaseSettings):
 
 class RedisSettings(MyBaseSettings):
     """Конфиг Redis"""
-    HOST: str = Field(alias="REDIS_HOST", default="localhost")
+    HOST: str = Field(alias="REDIS_HOST", default="redis")
     PORT: int = Field(alias="REDIS_PORT", default=6379)
     DB: int = Field(alias="REDIS_DB", default=0)
     PASSWORD: str = Field(alias="REDIS_PASSWORD", default="")
