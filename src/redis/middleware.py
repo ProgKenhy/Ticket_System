@@ -3,10 +3,10 @@ import json
 from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from .logger import logger
+from core.logger import logger
 
-from .redis import redis_client
-from .settings import settings
+from redis.service import redis_client
+from core.settings import settings
 
 SESSION_COOKIE = "session_id" # !TODO вынести в settings
 SESSION_PREFIX = "session:"

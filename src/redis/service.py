@@ -4,8 +4,8 @@ from typing import Callable
 import redis.asyncio as aioredis
 from pydantic import BaseModel
 
-from .settings import redis_settings
-from .logger import logger
+from core.settings import redis_settings
+from core.logger import logger
 
 import hashlib
 
