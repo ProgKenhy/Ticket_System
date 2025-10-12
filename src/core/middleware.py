@@ -3,6 +3,7 @@ import json
 from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+from .logger import logger
 
 from .redis import redis_client
 from .settings import settings
@@ -29,7 +30,7 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
                 raw = await redis_client.get(SESSION_PREFIX + session_id)
                 session = json.loads(raw) if raw else {"created_at": _now_iso()}
             except Exception as e:
-                print("Redis GET error:", e)
+                logger.error(f"Redis GET error", exc_info=e)
                 session = {"created_at": _now_iso()}
 
         request.state.session = session
@@ -59,6 +60,6 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
                     path="/",
                 )
         except Exception as e:
-            print("Redis SETEX error:", e)
+            logger.error(f"Redis SETEX error", exc_info=e)
 
         return response

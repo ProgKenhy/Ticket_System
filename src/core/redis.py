@@ -5,6 +5,7 @@ import redis.asyncio as aioredis
 from pydantic import BaseModel
 
 from .settings import redis_settings
+from .logger import logger
 
 import hashlib
 
@@ -51,21 +52,21 @@ async def get_cached_or_set(key: str, loader: Callable, ttl: int = redis_setting
     try:
         cached_raw = await redis_client.get(key)
     except Exception as e:
-        print("Redis GET error:", e) # в дальнейшем можно реализовать logger
+        logger.error(f"Redis GET error", exc_info=e)
         return await loader()
 
     if cached_raw is not None:
         try:
             data = json.loads(cached_raw)
-            print("CACHE HIT", key)
+            logger.info(f"CACHE HIT {key}")
             return data
         except Exception as e:
-            print("JSON load failed for cached data:", e)
+            logger.error(f"JSON load failed for cached data", exc_info=e)
     result = await loader()
     serializable = await _serialize_result(result)
     try:
         await redis_client.setex(key, int(ttl), json.dumps(serializable, ensure_ascii=False))
-        print("CACHE SET", key)
+        logger.info(f"CACHE SET {key}")
     except Exception as e:
-        print("Redis SETEX error:", e)
+        logger.error(f"Redis SETEX error", exc_info=e)
     return result
