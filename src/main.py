@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from redis.middleware import RedisSessionMiddleware
+from redis_service.middleware import RedisSessionMiddleware
 
 sys.path.append(str(Path(__file__).resolve().parent))
 

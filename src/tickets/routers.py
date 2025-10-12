@@ -8,7 +8,7 @@ from .models import TicketStatus
 from .schemas import TicketUpdate, TicketCreate, TicketResponse, TicketDeleteResponse
 from .crud import get_tickets_crud
 from .service import update_ticket_service, create_ticket_service, delete_ticket_service
-from redis.service import make_cache_key, get_cached_or_set
+from redis_service.service import make_cache_key, get_cached_or_set
 
 ticket_router = APIRouter()
 

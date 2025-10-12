@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from fastapi import Request, Response
 
-from redis.service import redis_client
+from redis_service.service import redis_client
 
 SESSION_COOKIE = "session_id" # !TODO вынести в settings
 SESSION_PREFIX = "session:"
