@@ -9,6 +9,10 @@ x-app: &default-app
   depends_on:
     redis:
       condition: "service_healthy"
+    mysql:
+      condition: "service_healthy"
+    rabbitmq:
+      condition: "service_healthy"
   env_file:
     - ".env"
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
@@ -37,9 +41,10 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "${MYSQL_USER}", "--password=${MYSQL_PASS}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "${MYSQL_USER}", "--password=${MYSQL_PASS}" ]
       interval: 10s
       retries: 5
+      start_period: 15s
     networks:
       - ticket_net
 
@@ -54,10 +59,11 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASS}", "ping" ]
+      test: [ "CMD", "redis-cli", "-a", "$$REDIS_PASS", "ping" ]
       interval: 10s
-      timeout: 5s
-      retries: 3
+      timeout: 15s
+      retries: 5
+      start_period: 40s
     networks:
       - ticket_net
 
@@ -65,6 +71,15 @@ services:
     image: rabbitmq:3.13-management
     container_name: ticket_rabbitmq
     restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: user # !TODO rabbit credentials
+      RABBITMQ_DEFAULT_PASS: password
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"       # брокер
       - "15672:15672"     # веб-UI
@@ -73,21 +88,31 @@ services:
     networks:
       - ticket_net
 
-#  app:
-#    <<: *default-app
-#    container_name: ticket_app
-#    ports:
-#      - "${API_PORT:-8000}:8000"
-#    volumes:
-#      - ./src:/app/src:ro
-#    healthcheck:
-#      test: [ 'CMD', 'curl', 'localhost:8000' ]
-#      interval: 10s
-#      timeout: 5s
-#      start_period: 5s
-#      retries: 3
-#    networks:
-#      - ticket_net
+  app:
+    <<: *default-app
+    container_name: ticket_app
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./src:/app/src:ro
+    healthcheck:
+      test: [ 'CMD', 'curl', 'localhost:8000' ]
+      interval: 10s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
+
+
+  consumer:
+    container_name: ticket_consumer
+    build:
+      context: .
+      target: consumer
+    depends_on:
+      - rabbitmq
+    networks:
+      - ticket_net
+
 
 volumes:
   mysql_data:
