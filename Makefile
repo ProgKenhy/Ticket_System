@@ -33,9 +33,9 @@ restart:
 	docker-compose -f docker-compose.yml stop $(c)
 	docker-compose -f docker-compose.yml up -d $(c)
 logs:
-	docker-compose -f docker-compose.yml logs --tail=100 -f $(c)
+	docker-compose -f docker-compose.yml logs --tail=50 -f $(c)
 logs-api:
-	docker-compose -f docker-compose.yml logs --tail=100 -f api
+	docker-compose -f docker-compose.yml logs --tail=50 -f api
 ps:
 	docker-compose -f docker-compose.yml ps
 login-timescale:
