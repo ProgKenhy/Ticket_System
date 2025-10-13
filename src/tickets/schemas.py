@@ -23,7 +23,6 @@ class TicketResponse(BaseModel):
 
 
 class TicketUpdate(BaseModel):
-    id: int = Field(gt=0, description="ID тикета")
     title: str | None = Field(None, max_length=200)
     description: str | None = Field(None)
     status: TicketStatus | None = Field(None, description="Статус тикета",

@@ -40,14 +40,14 @@ async def get_ticket_by_id(db: AsyncSession, ticket_id: int) -> Ticket | None:
     return res.scalar_one_or_none()
 
 
-async def update_ticket_crud(ticket_update: TicketUpdate, db: AsyncSession) -> Ticket:
+async def update_ticket_crud(ticket_id: int, ticket_update: TicketUpdate, db: AsyncSession) -> Ticket:
     """Обновление ticket в БД"""
     update_data = ticket_update.model_dump(exclude_unset=True)
 
     if not update_data:
         raise HTTPException(status_code=400, detail="No data to update")
 
-    stmt = select(Ticket).where(Ticket.id == ticket_update.id)
+    stmt = select(Ticket).where(Ticket.id == ticket_id)
     result = await db.execute(stmt)
     ticket = result.scalar_one_or_none()
 
