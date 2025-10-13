@@ -52,8 +52,3 @@ async def update_ticket_endpoint(ticket_id: int,
 async def delete_ticket_endpoint(ticket_id: int, user_id: Annotated[int, Depends(get_user_id_from_token)],
                                  db: Annotated[AsyncSession, Depends(get_db_session)]) -> TicketDeleteResponse:
     return await delete_ticket_service(ticket_id=ticket_id, user_id=user_id, db=db)
-
-# @app.post("/send-message/")
-# def send_message(message: str, background_tasks: BackgroundTasks):
-#     background_tasks.add_task(publish_message, message)
-#     return {"message": "Message sent to RabbitMQ"}

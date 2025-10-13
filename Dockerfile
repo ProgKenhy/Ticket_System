@@ -22,4 +22,4 @@ CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000
 FROM base AS consumer
 COPY src/rabbit/consumer.py ./rabbit/
 RUN pip install --user --no-cache-dir pika
-CMD ["python", "rabbit/consumer.py"]
+CMD ["python", "./rabbit/consumer.py"]
