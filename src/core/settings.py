@@ -25,13 +25,17 @@ class MySQLSettings(MyBaseSettings):
     NAME: str = Field(alias="MYSQL_NAME", default="bd_name")
 
     @property
-    def async_url(self) -> str:
+    def async_url(self):
         """Получение ссылки для асинхронной работы с MySQL"""
+        if settings.ENVIRONMENT == "testing":
+            return "sqlite+aiosqlite:///./test.db"
         return f"mysql+aiomysql://{self.USER}:{self.PASS.get_secret_value()}@{self.HOST}:{self.PORT}/{self.NAME}"
 
     @property
     def sync_url(self) -> str:
         """Получение ссылки для синхронной работы с MySQL"""
+        if settings.ENVIRONMENT == "testing":
+            return "sqlite+sqlite:///./test.db"
         return f"mysql+pymysql://{self.USER}:{self.PASS.get_secret_value()}@{self.HOST}:{self.PORT}/{self.NAME}"
 
 
@@ -47,6 +51,16 @@ class RedisSettings(MyBaseSettings):
     @property
     def async_url(self) -> str:
         return f"redis://{self.HOST}:{self.PORT}/{self.DB}"
+
+
+class RabbitSettings(MyBaseSettings):
+    """Конфиг RabbitMQ"""
+    HOST: str = Field(alias="RABBIT_HOST", default="rabbitmq")
+    PORT: int = Field(alias="RABBIT_PORT", default=5672)
+    USER: str = Field(alias="RABBIT_USER", default="user")
+    PASSWORD: SecretStr = Field(alias="RABBIT_PASSWORD", default="password")
+    QUEUE_NAME: str = Field(alias="RABBIT_QUEUE", default="fastapi_queue")
+
 
 class AuthSettings(MyBaseSettings):
     """Конфиг авторизации"""
@@ -65,3 +79,4 @@ settings = Settings()
 redis_settings = RedisSettings()
 auth_settings = AuthSettings()
 mysql_settings = MySQLSettings()
+rabbit_settings = RabbitSettings()
