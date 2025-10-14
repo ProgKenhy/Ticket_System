@@ -6,3 +6,6 @@ __pycache__/
 .env
 tests/
 .idea
+README
+Makefile
+.gitignore
