@@ -1,9 +1,6 @@
 import pika
-import logging
 import time
-
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
+from core.logger import logger
 
 
 def callback(ch, method, properties, body):
@@ -30,7 +27,7 @@ def consume_message():
             channel.start_consuming()
 
         except Exception as e:
-            logger.info(f"Ошибка {e}\nПереподключение через 5 секунд...")
+            logger.error(f"Ошибка {e}\nПереподключение через 5 секунд...")
             time.sleep(5)
 
 
