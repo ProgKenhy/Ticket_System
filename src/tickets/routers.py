@@ -9,8 +9,8 @@ from .schemas import TicketUpdate, TicketCreate, TicketResponse, TicketDeleteRes
 from .crud import get_tickets_crud
 from .service import update_ticket_service, create_ticket_service, delete_ticket_service
 from redis_service.service import make_cache_key, get_cached_or_set
-from rabbit.producer import publish_message
-
+from core.deps import get_rabbitmq
+from rabbit.producer import RabbitMQClient
 ticket_router = APIRouter()
 
 
@@ -18,9 +18,10 @@ ticket_router = APIRouter()
 async def create_ticket_endpoint(ticket: TicketCreate,
                                  background_tasks: BackgroundTasks,
                                  user_id: Annotated[int, Depends(get_user_id_from_token)],
-                                 db: Annotated[AsyncSession, Depends(get_db_session)]) -> TicketResponse:
+                                 db: Annotated[AsyncSession, Depends(get_db_session)],
+                                 rabbit: Annotated[RabbitMQClient, Depends(get_rabbitmq)]) -> TicketResponse:
     ticket = await create_ticket_service(ticket_data=ticket, user_id=user_id, db=db)
-    background_tasks.add_task(publish_message, f'Сущность ticket пользователя {user_id} создана (наверное :) )')
+    background_tasks.add_task(rabbit.publish, f'Сущность ticket пользователя {user_id} создана (наверное :) )')
     return TicketResponse.model_validate(ticket)
 
 
