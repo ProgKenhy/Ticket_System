@@ -5,8 +5,10 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from core.logger import logger
 
-from redis_service.service import redis_client
+from .client import get_redis_client
 from core.settings import settings
+
+redis_client = get_redis_client()
 
 SESSION_COOKIE = "session_id" # !TODO вынести в settings
 SESSION_PREFIX = "session:"

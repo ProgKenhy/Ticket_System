@@ -1,16 +1,15 @@
 import json
 from typing import Callable
 
-import redis.asyncio as aioredis
 from pydantic import BaseModel
 
 from core.settings import redis_settings
 from core.logger import logger
+from .client import get_redis_client
 
 import hashlib
 
-redis_client = aioredis.from_url(redis_settings.async_url, decode_responses=True, password=redis_settings.PASSWORD)
-
+redis_client = get_redis_client()
 
 async def _normalize_for_json(obj):
     """Преобразует объект в JSON-сериализуемую структуру."""
