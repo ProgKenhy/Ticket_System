@@ -16,10 +16,9 @@ async def get_rabbitmq(request: Request) -> RabbitMQClient:
 
 async def get_redis_client(request: Request) -> RedisClient:
     """Зависимость для redis клиента."""
-    redis = request.state.redis
-    if not redis:
+    redis_client = request.state.redis_client
+    if not redis_client:
         raise HTTPException(status_code=500, detail="Redis client not initialized")
-    redis_client = redis.client
     return redis_client
 
 

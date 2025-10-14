@@ -16,8 +16,7 @@ SESSION_TTL = redis_settings.SESSION_TTL
 class RedisSessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable):
 
-        redis = request.state.redis
-        redis_client = redis.client
+        redis_client = request.state.redis_client
 
         session_id = request.cookies.get(SESSION_COOKIE)
         is_new = False

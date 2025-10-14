@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[AppState]:
 
     redis = RedisClient()
     await redis.connect()
+    redis_client = redis.client
 
     rabbitmq = RabbitMQClient()
     rabbitmq.connect()
@@ -39,7 +40,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[AppState]:
         AppState,
         {
             "async_session_factory": async_session_factory,
-            "redis": redis,
+            "redis_client": redis_client,
             "rabbitmq": rabbitmq,
         },
     )
