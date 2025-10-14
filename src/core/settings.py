@@ -28,14 +28,14 @@ class MySQLSettings(MyBaseSettings):
     def async_url(self):
         """Получение ссылки для асинхронной работы с MySQL"""
         if settings.ENVIRONMENT == "testing":
-            return "sqlite+aiosqlite:///./test.db"
+            return "sqlite+aiosqlite:///:memory:"
         return f"mysql+aiomysql://{self.USER}:{self.PASS.get_secret_value()}@{self.HOST}:{self.PORT}/{self.NAME}"
 
     @property
     def sync_url(self) -> str:
         """Получение ссылки для синхронной работы с MySQL"""
         if settings.ENVIRONMENT == "testing":
-            return "sqlite+sqlite:///./test.db"
+            return "sqlite+sqlite:///:memory:"
         return f"mysql+pymysql://{self.USER}:{self.PASS.get_secret_value()}@{self.HOST}:{self.PORT}/{self.NAME}"
 
 

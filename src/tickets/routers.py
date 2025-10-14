@@ -3,14 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Optional
 
 from auth.deps import get_user_id_from_token
-from core.deps import get_db_session
+from core.deps import get_db_session, get_redis_client, get_rabbitmq
 from redis_service.client import RedisClient
 from .models import TicketStatus
 from .schemas import TicketUpdate, TicketCreate, TicketResponse, TicketDeleteResponse
 from .crud import get_tickets_crud
 from .service import update_ticket_service, create_ticket_service, delete_ticket_service
 from redis_service.service import make_cache_key, get_cached_or_set
-from core.deps import get_rabbitmq
 from rabbit.producer import RabbitMQClient
 ticket_router = APIRouter()
 
@@ -29,7 +28,7 @@ async def create_ticket_endpoint(ticket: TicketCreate,
 @ticket_router.get("s/", response_model=list[TicketResponse])
 async def get_tickets_endpoint(user_id: Annotated[int, Depends(get_user_id_from_token)],
                                db: Annotated[AsyncSession, Depends(get_db_session)],
-                               redis_client: Annotated[RedisClient, Depends(get_rabbitmq)],
+                               redis_client: Annotated[RedisClient, Depends(get_redis_client)],
                                statuses: Optional[list[TicketStatus]] = Query(None)
                                ) -> list[TicketResponse]:
     key = make_cache_key("cache:ticket:list", "/ticket", user_id,

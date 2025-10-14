@@ -1,27 +1,50 @@
+from typing import TypedDict, AsyncIterator, cast
+
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+
 from redis_service.client import RedisClient
-from .clients import clients
 from rabbit.producer import RabbitMQClient
 from .logger import logger
+from .database import get_async_engine, get_async_session_factory
 
+def import_all_models() -> None:
+    import users.models  # noqa: F401
+    import tickets.models  # noqa: F401
+
+
+class AppState(TypedDict):
+    async_session_factory: async_sessionmaker[AsyncSession]
+    redis: RedisClient
+    rabbitmq: RabbitMQClient
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    clients.rabbitmq = RabbitMQClient()
-    clients.rabbitmq.connect()
-    logger.info("RabbitMQ connected")
+async def lifespan(app: FastAPI) -> AsyncIterator[AppState]:
+    import_all_models()
 
-    clients.redis = RedisClient()
-    await clients.redis.connect()
+    async_engine = get_async_engine()
+    async_session_factory = get_async_session_factory(async_engine)
 
-    yield
+    redis = RedisClient()
+    await redis.connect()
 
-    if clients.rabbitmq:
-        clients.rabbitmq.close()
-        logger.info("RabbitMQ connection closed")
+    rabbitmq = RabbitMQClient()
+    rabbitmq.connect()
 
-    if clients.redis:
-        await clients.redis.close()
-        logger.info("Redis connection closed")
+    logger.info("Dependencies initialized")
+
+    yield cast(
+        AppState,
+        {
+            "async_session_factory": async_session_factory,
+            "redis": redis,
+            "rabbitmq": rabbitmq,
+        },
+    )
+
+    logger.info("Shutting down dependencies...")
+    rabbitmq.close()
+    await redis.close()
+    await async_engine.dispose()

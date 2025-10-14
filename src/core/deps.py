@@ -1,29 +1,31 @@
 from typing import AsyncGenerator
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rabbit.producer import RabbitMQClient
-from .database import get_async_engine
-from .clients import clients
-import redis.asyncio as aioredis
+from redis_service.client import RedisClient
 
-async def get_rabbitmq() -> RabbitMQClient:
+async def get_rabbitmq(request: Request) -> RabbitMQClient:
     """Зависимость для RabbitMQ клиента."""
-    if not clients.rabbitmq:
+    rabbitmq = request.state.rabbitmq
+    if not rabbitmq:
         raise HTTPException(status_code=500, detail="RabbitMQ client not initialized")
-    return clients.rabbitmq
+    return rabbitmq
 
 
-async def get_redis() -> aioredis.Redis:
+async def get_redis_client(request: Request) -> RedisClient:
     """Зависимость для redis клиента."""
-    if not clients.redis:
+    redis = request.state.redis
+    if not redis:
         raise HTTPException(status_code=500, detail="Redis client not initialized")
-    return clients.redis
+    redis_client = redis.client
+    return redis_client
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+
+async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
     """Получение сессии для работы с бд"""
-    _, async_session_factory = get_async_engine()
+    async_session_factory = request.state.async_session_factory
     async with async_session_factory() as session:
         try:
             yield session

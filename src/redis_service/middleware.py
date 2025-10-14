@@ -7,7 +7,6 @@ from core.logger import logger
 
 from core.settings import settings, redis_settings
 from .utils import _now_iso
-from core.clients import clients
 
 SESSION_COOKIE = redis_settings.SESSION_COOKIE
 SESSION_PREFIX = redis_settings.SESSION_PREFIX
@@ -16,6 +15,10 @@ SESSION_TTL = redis_settings.SESSION_TTL
 
 class RedisSessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable):
+
+        redis = request.state.redis
+        redis_client = redis.client
+
         session_id = request.cookies.get(SESSION_COOKIE)
         is_new = False
 
@@ -24,12 +27,6 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
                 "curl" in user_agent.lower() or
                 "healthcheck" in user_agent.lower()):
             return await call_next(request)
-
-        if not clients.redis or not clients.redis.client:
-            logger.error("Redis client not initialized")
-            return await call_next(request)
-
-        redis_client = clients.redis.client
 
         if not session_id:
             session_id = str(uuid.uuid4())
