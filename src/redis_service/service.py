@@ -1,46 +1,11 @@
 import json
 from typing import Callable
 
-from pydantic import BaseModel
-
 from core.settings import redis_settings
 from core.logger import logger
-from .client import get_redis_client
-
+from .utils import _serialize_result
 import hashlib
-
-redis_client = get_redis_client()
-
-async def _normalize_for_json(obj):
-    """Преобразует объект в JSON-сериализуемую структуру."""
-    if isinstance(obj, BaseModel):
-        return obj.model_dump()
-    if isinstance(obj, dict):
-        return obj
-    if hasattr(obj, "as_dict") and callable(obj.as_dict):
-        return obj.as_dict()
-    if hasattr(obj, "__dict__"):
-        result = {}
-        for k, v in obj.__dict__.items():
-            if k.startswith("_"):
-                continue
-            try:
-                json.dumps(v)
-                result[k] = v
-            except TypeError:
-                result[k] = str(v)
-        return result
-    return obj
-
-
-async def _serialize_result(result):
-    """Возвращает JSON-сериализуемую структуру: если list -> список сериализованных элементов."""
-    if isinstance(result, list):
-        out = []
-        for item in result:
-            out.append(await _normalize_for_json(item))
-        return out
-    return await _normalize_for_json(result)
+from redis_service.client import RedisClient
 
 
 def make_cache_key(prefix: str, *parts) -> str:
@@ -50,7 +15,7 @@ def make_cache_key(prefix: str, *parts) -> str:
     return f"{prefix}:{hashed}"
 
 
-async def get_cached_or_set(key: str, loader: Callable, ttl: int = redis_settings.TTL):
+async def get_cached_or_set(redis_client: RedisClient, key: str, loader: Callable, ttl: int = redis_settings.TTL):
     """Получение данных из хэша либо добавление их при отсутствии"""
     try:
         cached_raw = await redis_client.get(key)

@@ -5,18 +5,14 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from core.logger import logger
 
-from .client import get_redis_client
-from core.settings import settings
+from core.settings import settings, redis_settings
+from .utils import _now_iso
+from core.clients import clients
 
-redis_client = get_redis_client()
+SESSION_COOKIE = redis_settings.SESSION_COOKIE
+SESSION_PREFIX = redis_settings.SESSION_PREFIX
+SESSION_TTL = redis_settings.SESSION_TTL
 
-SESSION_COOKIE = "session_id" # !TODO вынести в settings
-SESSION_PREFIX = "session:"
-SESSION_TTL = 3600
-
-def _now_iso():
-    from datetime import datetime, timezone
-    return datetime.now(timezone.utc).isoformat()
 
 class RedisSessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable):
@@ -25,9 +21,15 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
 
         user_agent = request.headers.get("user-agent", "")
         if (request.url.path in ["/health", "/"] or
-            "curl" in user_agent.lower() or
-            "healthcheck" in user_agent.lower()):
+                "curl" in user_agent.lower() or
+                "healthcheck" in user_agent.lower()):
             return await call_next(request)
+
+        if not clients.redis or not clients.redis.client:
+            logger.error("Redis client not initialized")
+            return await call_next(request)
+
+        redis_client = clients.redis.client
 
         if not session_id:
             session_id = str(uuid.uuid4())

@@ -4,6 +4,7 @@ from typing import Annotated, Optional
 
 from auth.deps import get_user_id_from_token
 from core.deps import get_db_session
+from redis_service.client import RedisClient
 from .models import TicketStatus
 from .schemas import TicketUpdate, TicketCreate, TicketResponse, TicketDeleteResponse
 from .crud import get_tickets_crud
@@ -21,13 +22,14 @@ async def create_ticket_endpoint(ticket: TicketCreate,
                                  db: Annotated[AsyncSession, Depends(get_db_session)],
                                  rabbit: Annotated[RabbitMQClient, Depends(get_rabbitmq)]) -> TicketResponse:
     ticket = await create_ticket_service(ticket_data=ticket, user_id=user_id, db=db)
-    background_tasks.add_task(rabbit.publish, f'Сущность ticket пользователя {user_id} создана (наверное :) )')
+    background_tasks.add_task(rabbit.publish, f'Сущность ticket пользователя {user_id} создана')
     return TicketResponse.model_validate(ticket)
 
 
 @ticket_router.get("s/", response_model=list[TicketResponse])
 async def get_tickets_endpoint(user_id: Annotated[int, Depends(get_user_id_from_token)],
                                db: Annotated[AsyncSession, Depends(get_db_session)],
+                               redis_client: Annotated[RedisClient, Depends(get_rabbitmq)],
                                statuses: Optional[list[TicketStatus]] = Query(None)
                                ) -> list[TicketResponse]:
     key = make_cache_key("cache:ticket:list", "/ticket", user_id,
@@ -36,7 +38,7 @@ async def get_tickets_endpoint(user_id: Annotated[int, Depends(get_user_id_from_
     async def loader():
         return await get_tickets_crud(user_id=user_id, statuses=statuses, db=db)
 
-    tickets = await get_cached_or_set(key, loader)
+    tickets = await get_cached_or_set(redis_client, key, loader)
     return [TicketResponse.model_validate(ticket) for ticket in tickets]
 
 

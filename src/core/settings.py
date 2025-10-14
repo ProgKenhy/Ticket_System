@@ -47,6 +47,9 @@ class RedisSettings(MyBaseSettings):
     PASSWORD: str = Field(alias="REDIS_PASSWORD", default="")
 
     TTL: int = Field(alias="REDIS_TTL", default=-1)
+    SESSION_COOKIE: str = "session_id"
+    SESSION_PREFIX: str = "session:"
+    SESSION_TTL: int = 3600
 
     @property
     def async_url(self) -> str:

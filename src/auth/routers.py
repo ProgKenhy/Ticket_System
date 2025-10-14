@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .auth_session import update_session_when_login, delete_session
+from .auth_session import update_session_when_login
 from .schemas import Token
 from core.deps import get_db_session
 from .utils import create_access_token
@@ -24,9 +24,3 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     )
     return Token(access_token=token_str, token_type="bearer")
 
-
-@auth_router.post("/delete_session")
-async def logout(response: Response, request: Request):
-    """Выход пользователя - очистка сессии"""
-    await delete_session(response=response, request=request)
-    return {"message": "Logged out successfully"}
