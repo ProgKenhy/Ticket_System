@@ -12,3 +12,6 @@ alembic history
 
 # Показать текущую версию
 alembic current
+
+# Запуск тестов с определением покрытия
+pytest --cov=src tests/
