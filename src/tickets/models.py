@@ -7,7 +7,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-from core.base import MyBaseModel
+from db.base import MyBaseModel
 
 if TYPE_CHECKING:
     from users.models import User

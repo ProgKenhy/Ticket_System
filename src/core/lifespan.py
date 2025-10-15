@@ -8,11 +8,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from redis_service.client import RedisClient
 from rabbit.producer import RabbitMQClient
 from .logger import logger
-from .database import get_async_engine, get_async_session_factory
-
-def import_all_models() -> None:
-    import users.models  # noqa: F401
-    import tickets.models  # noqa: F401
+from db.database import get_async_engine, get_async_session_factory
+from db.init_models import import_all_models
 
 
 class AppState(TypedDict):

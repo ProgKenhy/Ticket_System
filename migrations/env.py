@@ -18,9 +18,9 @@ if config.config_file_name is not None:
 
 config.set_main_option("sqlalchemy.url", settings.database.sync_url)
 
-from core.database import import_all_models
+from db.init_models import import_all_models
 
-from core.base import MyBaseModel
+from db.base import MyBaseModel
 import_all_models()
 
 target_metadata = MyBaseModel.metadata

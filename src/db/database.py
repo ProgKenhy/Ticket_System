@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
-from .settings import mysql_settings, settings
+from core.settings import mysql_settings, settings
 
 
 def get_async_engine():
