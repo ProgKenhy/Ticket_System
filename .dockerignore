@@ -10,3 +10,5 @@ README
 Makefile
 .gitignore
 .github/
+coverage.xml
+.coverage
