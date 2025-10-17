@@ -7,11 +7,11 @@ x-app: &default-app
       - "GID=${GID:-1000}"
       - "DEBUG=${DEBUG:-false}"
   depends_on:
+    rabbitmq:
+      condition: "service_healthy"
     redis:
       condition: "service_healthy"
     mysql:
-      condition: "service_healthy"
-    rabbitmq:
       condition: "service_healthy"
   env_file:
     - ".env"
@@ -94,14 +94,14 @@ services:
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
-      - ./src:/app/src:ro
+      - ./src:/app/src
       - ./logs:/app/logs
+      - ./migrations:/app/migrations
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/health/" ]
-      interval: 10s
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=2)" ]
       timeout: 5s
-      start_period: 5s
-      retries: 3
+      start_period: 15s
+      retries: 10
 
 
   consumer:
