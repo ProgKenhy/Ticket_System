@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'src'))
 
-from core.settings import settings
+from core.settings import settings, mysql_settings
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -16,7 +16,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.database.sync_url)
+config.set_main_option("sqlalchemy.url", mysql_settings.sync_url)
 
 from db.init_models import import_all_models
 
