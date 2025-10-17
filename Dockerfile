@@ -30,6 +30,8 @@ EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 FROM base AS consumer
+WORKDIR /app/src
+
 COPY src/rabbit/consumer.py ./
 COPY src/core/logger.py ./core/
 RUN pip install --user --no-cache-dir pika
