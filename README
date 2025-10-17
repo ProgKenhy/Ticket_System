@@ -1,17 +1,43 @@
-# Создать новую миграцию
-alembic revision --autogenerate -m "description"
+# Ticket System
 
-# Применить миграции
-alembic upgrade head
+Система тикетов на FastAPI с Redis, MySQL и RabbitMQ.
 
-# Откатить последнюю миграцию
-alembic downgrade -1
+## Быстрый старт
 
-# Показать историю миграций
-alembic history
+```bash
+# 1. Настраиваем
+cd Ticket_System
+cp .env.example .env
 
-# Показать текущую версию
-alembic current
+# 2. Запускаем сервисы
+docker-compose up --build -d
 
-# Запуск тестов с определением покрытия
+# 3. Применяем миграции
+make upgrade
+
+# 4. Открываем документацию API
+open http://localhost:8000/docs
+
+Примеры работы с API предоставлены в документации
+
+Команды управления
+# Миграции
+make create message="add_users_table"
+make upgrade
+make downgrade
+
+# Тестирование с измерением coverage
 pytest --cov=src tests/
+
+Сервисы
+
+API: http://localhost:8000
+
+Документация: http://localhost:8000/docs
+
+RabbitMQ: http://localhost:15672
+ (user/password)
+
+MySQL: localhost:3306
+
+Redis: localhost:6379
