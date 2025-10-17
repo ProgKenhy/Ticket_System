@@ -17,27 +17,28 @@ make upgrade
 
 # 4. Открываем документацию API
 open http://localhost:8000/docs
+```
 
-Примеры работы с API предоставлены в документации
+Примеры работы с API предоставлены в документации.
 
-Команды управления
-# Миграции
+## Команды управления
+
+### Миграции
+```bash
 make create message="add_users_table"
 make upgrade
 make downgrade
+```
 
-# Тестирование с измерением coverage
+### Тестирование с измерением покрытия
+```bash
 pytest --cov=src tests/
+```
 
-Сервисы
+## Сервисы
 
-API: http://localhost:8000
-
-Документация: http://localhost:8000/docs
-
-RabbitMQ: http://localhost:15672
- (user/password)
-
-MySQL: localhost:3306
-
-Redis: localhost:6379
+- **API:** http://localhost:8000
+- **Документация:** http://localhost:8000/docs
+- **RabbitMQ:** http://localhost:15672 (user/password)
+- **MySQL:** localhost:3306
+- **Redis:** localhost:6379
