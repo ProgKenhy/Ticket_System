@@ -114,6 +114,7 @@ services:
       - app
     volumes:
       - ./logs:/app/logs
+      - ./src/rabbit/consumer.py:/app/consumer.py
     networks:
       - ticket_net
 
