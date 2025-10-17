@@ -1,5 +1,5 @@
 THIS_FILE := $(lastword $(MAKEFILE_LIST))
-.PHONY: help build up start down destroy stop restart logs logs-api ps login-timescale login-api db-shell
+.PHONY: help build up start down destroy stop restart logs logs-api ps login-timescale login-api db-shell migrate create upgrade current
 
 help:
 	@echo "Available targets:"
@@ -44,3 +44,15 @@ login-api:
 	docker-compose -f docker-compose.yml exec api /bin/bash
 db-shell:
 	docker-compose -f docker-compose.yml exec timescale psql -Upostgres
+migrate:
+	docker-compose exec app bash -c "cd /app && alembic revision --autogenerate -m $(message)"
+create:
+	docker-compose exec app bash -c "cd /app && alembic revision --autogenerate -m $(message)"
+upgrade:
+	docker-compose exec app bash -c "cd /app && alembic upgrade head"
+downgrade:
+	docker-compose exec app bash -c "cd /app && alembic downgrade -1"
+current:
+	docker-compose exec app bash -c "cd /app && alembic current"
+history:
+	docker-compose exec app bash -c "cd /app && alembic history --verbose"
