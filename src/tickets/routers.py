@@ -14,7 +14,7 @@ from rabbit.producer import RabbitMQClient
 ticket_router = APIRouter()
 
 
-@ticket_router.post("/", response_model=TicketResponse)
+@ticket_router.post("/", response_model=TicketResponse, status_code=201)
 async def create_ticket_endpoint(ticket: TicketCreate,
                                  background_tasks: BackgroundTasks,
                                  user_id: Annotated[int, Depends(get_user_id_from_token)],

@@ -13,7 +13,7 @@ from .service import register_user
 users_router = APIRouter()
 
 
-@users_router.post("/register", response_model=UserResponse)
+@users_router.post("/register", response_model=UserResponse, status_code=201)
 async def register_user_endpoint(body: UserRegister, db: Annotated[AsyncSession, Depends(get_db_session)],
                                  rabbit: Annotated[RabbitMQClient, Depends(get_rabbitmq)],
                                  background_tasks: BackgroundTasks):
