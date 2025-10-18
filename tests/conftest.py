@@ -30,13 +30,11 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 async def test_engine():
     """Создает временную SQLite базу данных."""
-    # clear_mappers()
-    from users.models import User
-    from tickets.models import Ticket
-    # import_all_models()
+
+    import_all_models()
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
         connect_args={"check_same_thread": False},
